@@ -159,11 +159,43 @@ class Multix
       end
 
       def succ
-        #nxt.o
+        if @right
+          c = @right
+          while c.left
+            c = c.left
+          end
+        else
+          n = self
+          c = @parent
+          while c
+            if n == c.left
+              break
+            end
+            n = c
+            c = n.parent
+          end
+        end
+        c ? c.o : nil
       end
 
       def prev
-        #prv.o
+        if @left
+          c = @left
+          while c.right
+            c = c.right
+          end
+        else
+          n = self
+          c = @parent
+          while c
+            if n == c.right
+              break
+            end
+            n = c
+            c = n.parent
+          end
+        end
+        c ? c.o : nil
       end
     end
 
@@ -392,9 +424,9 @@ class Multix
     end
 
     def _splay(n)
-      until n == @root
+      #until n == @root
         _splay_step(n)
-      end
+      #end
     end
 
     def _splay_step(n)
@@ -535,6 +567,10 @@ if __FILE__ == $0
       assert_equal(a.size, b.size)
       assert_equal(a.sort, b)
       assert_equal(["cpp_akira", "foo", "foo", "kinaba", "melponn"], b)
+
+      kinaba = m.by(:twitter_id)['kinaba']
+      melponn = kinaba.succ(:twitter_id)
+      assert_equal('melponn', melponn.twitter_id)
     end
 
     class Num
@@ -573,6 +609,10 @@ if __FILE__ == $0
       num.times do |i|
         assert_equal(i, m.by(:val)[i].val)
       end
+      #m.by(:val).dump
+      (0...num).sort_by{rand}.each do |i|
+        assert_equal(i, m.by(:val)[i].val)
+      end
 
       #m.by(:val).dump
       m.delete(m.by(:val)[num])
@@ -585,11 +625,31 @@ if __FILE__ == $0
         m.delete(m.by(:val)[v])
       end
 
-      a = m.by(:val).to_a
+      a = m.by(:val).map{|v|v.val}
       assert_equal(num / 2, a.size)
       (num/2).times do |i|
-        assert_equal(i, a[i].val)
+        assert_equal(i, a[i])
       end
+
+      b = []
+      iter = m.by(:val)[0]
+      assert_not_nil(iter)
+      assert_nil(iter.prev(:val))
+      while iter
+        b << iter.val
+        iter = iter.succ(:val)
+      end
+      assert_equal(a, b)
+
+      c = []
+      iter = m.by(:val)[num/2-1]
+      assert_not_nil(iter)
+      assert_nil(iter.succ(:val))
+      while iter
+        c << iter.val
+        iter = iter.prev(:val)
+      end
+      assert_equal(a, c.reverse)
 
       (num/2).times do |i|
         assert_equal(i, m.push(Num.new(i)).val)
