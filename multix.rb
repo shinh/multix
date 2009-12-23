@@ -590,6 +590,16 @@ if __FILE__ == $0
       (num/2).times do |i|
         assert_equal(i, a[i].val)
       end
+
+      (num/2).times do |i|
+        assert_equal(i, m.push(Num.new(i)).val)
+      end
+
+      a = m.by(:val).to_a
+      assert_equal(num, a.size)
+      num.times do |i|
+        assert_equal(i / 2, a[i].val)
+      end
     end
   end
 end
